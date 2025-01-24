@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        form {
+            display: inline-block;
+            text-align: left;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        input {
+            margin-bottom: 10px;
+            display: block;
+            width: 100%;
+            padding: 8px;
+        }
+        button {
+            padding: 10px 15px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registerForm">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required />
+
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required />
+
+        <label for="country">Country</label>
+        <input type="text" id="country" name="country" placeholder="Enter your country" required />
+
+        <label for="rnCode">RN CODE</label>
+        <input type="text" id="rnCode" name="rnCode" placeholder="Enter RN Code" required />
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p id="responseMessage" style="margin-top: 20px; color: green;"></p>
+
+    <script>
+        // JavaScript for handling form submission
+        document.getElementById("registerForm").addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent the page from reloading
+
+            // Get form data
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const country = document.getElementById("country").value;
+            const rnCode = document.getElementById("rnCode").value;
+
+            // Validate input
+            if (!name || !phone || !country || !rnCode) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            // Send data to a server (this is a placeholder URL)
+            try {
+                const response = await fetch("https://example.com/api/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, phone, country, rnCode }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById("responseMessage").innerText =
+                        "Registration successful! " + result.message;
+                } else {
+                    document.getElementById("responseMessage").innerText =
+                        "Registration failed. Please try again.";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("responseMessage").innerText =
+                    "Error submitting the form.";
+            }
+        });
+    </script>
+</body>
+</html>
