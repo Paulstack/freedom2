@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Submission</title>
+    <title>Freedome Solution</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,26 +17,31 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
         }
-        input {
-            margin-bottom: 10px;
+        input, select, button {
             display: block;
             width: 100%;
-            padding: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
         }
-        button {
-            padding: 10px 15px;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        #dashboard {
+            margin-top: 30px;
+            text-align: left;
+        }
+        #userList {
+            list-style: none;
+            padding: 0;
+        }
+        #userList li {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form action="https://formspree.io/f/xjkggzwq" method="POST">
+    <h1>Freedome Solution</h1>
+    <form id="registerForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
         <label for="name">Name</label>
         <input type="text" id="name" name="name" placeholder="Enter your name" required />
 
@@ -46,85 +51,99 @@
         <label for="country">Country</label>
         <input type="text" id="country" name="country" placeholder="Enter your country" required />
 
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
+            <option value="">Select your gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
         <label for="rnCode">RN CODE</label>
-        <input type="text" id="rnCode" name="rnCode" placeholder="Enter RN Code" required />
+        <input type="text" id="rnCode" name="rnCode" placeholder="Enter your RN Code" required />
 
         <button type="submit">Register</button>
     </form>
 
-    <p id="responseMessage" style="margin-top: 20px; color: green;"></p>
+    <div id="dashboard">
+        <h2>User Dashboard</h2>
+        <ul id="userList"></ul>
+    </div>
+
+    <a href="/login">Login to check your progress</a>
 
     <script>
-        // // JavaScript for handling form submission
-document.getElementById("registerForm").addEventListener("submit", function(event) {
-    event.preventDefault(); // Prevent the form from submitting and refreshing the page
+        // Handle form submission
+        document.getElementById("registerForm").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-    // Get form data
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
-    const country = document.getElementById("country").value;
-    const rnCode = document.getElementById("rnCode").value;
+            // Get form data
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const country = document.getElementById("country").value;
+            const gender = document.getElementById("gender").value;
+            const rnCode = document.getElementById("rnCode").value;
 
-    // Validate form data
-    if (!name || !phone || !country || !rnCode) {
-        alert("Please fill all fields.");
-        return;
-    }
+            // Get existing users or initialize an empty list
+            let users = JSON.parse(localStorage.getItem("users")) || [];
 
-    // Store user data in localStorage
-    localStorage.setItem("name", name);
-    localStorage.setItem("phone", phone);
-    localStorage.setItem("country", country);
-    localStorage.setItem("rnCode", rnCode);
+            // Add new user to the queue
+            users.push({
+                name,
+                phone,
+                country,
+                gender,
+                rnCode,
+                stage: 1,
+            });
 
-    // Initialize progress array if it's the user's first visit
-    if (!localStorage.getItem("progress")) {
-        localStorage.setItem("progress", JSON.stringify([]));
-    }
+            // Update user stages
+            users = updateStages(users);
 
-    // Update progress (for example, after registration)
-    updateProgress("Registered successfully!");
+            // Save updated users to localStorage
+            localStorage.setItem("users", JSON.stringify(users));
 
-    // Show confirmation message
-    document.getElementById("responseMessage").innerText = "Registration successful!";
+            // Refresh the dashboard
+            displayUsers();
 
-    // Display updated progress
-    displayProgress();
-});
-
-// Function to update progress
-function updateProgress(task) {
-    let progress = JSON.parse(localStorage.getItem("progress"));
-    progress.push(task);
-    localStorage.setItem("progress", JSON.stringify(progress));
-}
-
-// Function to display progress
-function displayProgress() {
-    let progress = JSON.parse(localStorage.getItem("progress"));
-
-    // If no progress exists, initialize as an empty array
-    if (!progress) {
-        progress = [];
-    }
-
-    const progressContainer = document.getElementById("progressContainer");
-
-    // Clear the container before updating
-    progressContainer.innerHTML = "";
-
-    // Display each progress item
-    progress.forEach((task, index) => {
-        const taskElement = document.createElement("li");
-        taskElement.textContent = Task ${index + 1}: ${task};
-        progressContainer.appendChild(taskElement);
-    });
-}
-
-// Call displayProgress to update the UI when the page loads
-window.onload = displayProgress;
-            }
+            // Clear form
+            document.getElementById("registerForm").reset();
         });
+
+        // Function to update stages and remove users at stage 12
+        function updateStages(users) {
+            users.forEach(user => {
+                user.stage++;
+            });
+
+            // Remove users who reach stage 12
+            users = users.filter(user => user.stage <= 12);
+
+            return users;
+        }
+
+        // Function to display users in the dashboard
+        function displayUsers() {
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+            const userList = document.getElementById("userList");
+
+            userList.innerHTML = ""; // Clear current list
+
+            users.forEach((user, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `
+                    #${index + 1}: ${user.name} (${user.phone}) - Stage ${user.stage}
+                    [Country: ${user.country}, Gender: ${user.gender}, RN Code: ${user.rnCode}]
+                `;
+                userList.appendChild(listItem);
+            });
+        }
+
+        // Load users on page load
+        window.onload = function () {
+            displayUsers();
+        };
     </script>
 </body>
 </html>
+
