@@ -1,0 +1,71 @@
+ html
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Login</title>
+       <style>
+           body {
+               font-family: Arial, sans-serif;
+               text-align: center;
+               margin: 20px;
+           }
+           form {
+               display: inline-block;
+               text-align: left;
+               border: 1px solid #ccc;
+               padding: 20px;
+               border-radius: 10px;
+               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+               width: 300px;
+           }
+           input, button {
+               display: block;
+               width: 100%;
+               margin: 10px 0;
+               padding: 10px;
+               font-size: 16px;
+           }
+       </style>
+   </head>
+   <body>
+       <h1>Login</h1>
+       <form id="loginForm">
+           <label for="name">Name</label>
+           <input type="text" id="name" name="name" placeholder="Enter your name" required />
+
+           <label for="rnCode">RN CODE</label>
+           <input type="text" id="rnCode" name="rnCode" placeholder="Enter your RN Code" required />
+
+           <button type="submit">Login</button>
+       </form>
+
+       <div id="loginStatus"></div>
+
+       <script>
+           // Handle form submission
+           document.getElementById("loginForm").addEventListener("submit", function (event) {
+               event.preventDefault();
+
+               // Get form data
+               const name = document.getElementById("name").value;
+               const rnCode = document.getElementById("rnCode").value;
+
+               // Get existing users from localStorage
+               const users = JSON.parse(localStorage.getItem("users")) || [];
+
+               // Check if user exists
+               const user = users.find(user => user.name === name && user.rnCode === rnCode);
+
+               // Display login status
+               const loginStatus = document.getElementById("loginStatus");
+               if (user) {
+                   loginStatus.textContent = `Welcome, ${user.name}! You are at Stage ${user.stage}.`;
+               } else {
+                   loginStatus.textContent = "User not found. Please check your name and RN Code.";
+               }
+           });
+       </script>
+   </body>
+   </html>
