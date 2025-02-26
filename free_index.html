@@ -83,7 +83,7 @@
             apiKey: "AIzaSyByUPQbi-IRGIQ7F_0LzPFcdoaahKOsPkw",
             authDomain: "freedom-solution3.firebaseapp.com",
             projectId: "freedom-solution3",
-            storageBucket: "freedom-solution3.appspot.com", // FIXED STORAGE BUCKET
+            storageBucket: "freedom-solution3.appspot.com",
             messagingSenderId: "443073665350",
             appId: "1:443073665350:web:df68bea8f80e309a7d2d47"
         };
@@ -122,11 +122,35 @@
 
                 alert("User registered successfully!");
                 document.getElementById("registerForm").reset();
+                displayUsers();
             } catch (error) {
                 console.error("Error adding document:", error);
                 alert("Error registering user. Please try again.");
             }
         });
+
+        // Function to display users in the dashboard
+        async function displayUsers() {
+            const userList = document.getElementById("userList");
+            userList.innerHTML = ""; // Clear current list
+
+            try {
+                const querySnapshot = await db.collection("users").orderBy("createdAt", "desc").get();
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${user.name} (${user.phone}) - Stage ${user.stage}`;
+                    userList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+            }
+        }
+
+        // Load users on page load
+        window.onload = function () {
+            displayUsers();
+        };
     </script>
 </body>
 </html>

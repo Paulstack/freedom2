@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Freedome Solution</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,30 +40,49 @@
         <button type="submit">Login</button>
     </form>
 
-    <div id="loginStatus"></div>
+    <a href="index.html">Go back to Register</a>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
 
     <script>
-        // Handle form submission
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyByUPQbi-IRGIQ7F_0LzPFcdoaahKOsPkw",
+            authDomain: "freedom-solution3.firebaseapp.com",
+            projectId: "freedom-solution3",
+            storageBucket: "freedom-solution3.appspot.com",
+            messagingSenderId: "443073665350",
+            appId: "1:443073665350:web:df68bea8f80e309a7d2d47"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Handle login form submission
         document.getElementById("loginForm").addEventListener("submit", function (event) {
             event.preventDefault();
 
-            // Get form data
-            const name = document.getElementById("name").value;
-            const rnCode = document.getElementById("rnCode").value;
+            const name = document.getElementById("name").value.trim();
+            const rnCode = document.getElementById("rnCode").value.trim();
 
-            // Get existing users from localStorage
-            const users = JSON.parse(localStorage.getItem("users")) || [];
-
-            // Check if user exists
-            const user = users.find(user => user.name === name && user.rnCode === rnCode);
-
-            // Display login status
-            const loginStatus = document.getElementById("loginStatus");
-            if (user) {
-                loginStatus.textContent = `Welcome, ${user.name}! You are at Stage ${user.stage}.`;
-            } else {
-                loginStatus.textContent = "User not found. Please check your name and RN Code.";
-            }
+            db.collection("users")
+                .where("name", "==", name)
+                .where("rnCode", "==", rnCode)
+                .get()
+                .then(snapshot => {
+                    if (!snapshot.empty) {
+                        const user = snapshot.docs[0].data();
+                        alert(`Welcome, ${user.name}! You are at Stage ${user.stage}.`);
+                    } else {
+                        alert("User not found. Please check your name and RN code.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking user: ", error);
+                });
         });
     </script>
 </body>
