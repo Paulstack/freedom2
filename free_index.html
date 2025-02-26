@@ -72,95 +72,61 @@
 
     <a href="login.html">Login to check your progress</a>
 
-    <script>
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "firebase/app";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
 
-        // Your web app's Firebase configuration
+    <script>
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyByUPQbi-IRGIQ7F_0LzPFcdoaahKOsPkw",
             authDomain: "freedom-solution3.firebaseapp.com",
             projectId: "freedom-solution3",
-            storageBucket: "freedom-solution3.firebasestorage.app",
+            storageBucket: "freedom-solution3.appspot.com", // FIXED STORAGE BUCKET
             messagingSenderId: "443073665350",
             appId: "1:443073665350:web:df68bea8f80e309a7d2d47"
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // Handle form submission
-        document.getElementById("registerForm").addEventListener("submit", function (event) {
+        document.getElementById("registerForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            // Get form data
-            const name = document.getElementById("name").value;
-            const phone = document.getElementById("phone").value;
-            const country = document.getElementById("country").value;
+            const name = document.getElementById("name").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const country = document.getElementById("country").value.trim();
             const gender = document.getElementById("gender").value;
-            const rnCode = document.getElementById("rnCode").value;
+            const rnCode = document.getElementById("rnCode").value.trim();
 
-            // Get existing users or initialize an empty list
-            let users = JSON.parse(localStorage.getItem("users")) || [];
+            // Input validation
+            if (!name || !phone || !country || !gender || !rnCode) {
+                alert("All fields are required!");
+                return;
+            }
 
-            // Add new user to the queue
-            users.push({
-                name,
-                phone,
-                country,
-                gender,
-                rnCode,
-                stage: 1,
-            });
+            try {
+                await db.collection("users").add({
+                    name,
+                    phone,
+                    country,
+                    gender,
+                    rnCode,
+                    stage: 1, // Start at Stage 1
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
 
-            // Update user stages
-            users = updateStages(users);
-
-            // Save updated users to localStorage
-            localStorage.setItem("users", JSON.stringify(users));
-
-            // Refresh the dashboard
-            displayUsers();
-
-            // Clear form
-            document.getElementById("registerForm").reset();
+                alert("User registered successfully!");
+                document.getElementById("registerForm").reset();
+            } catch (error) {
+                console.error("Error adding document:", error);
+                alert("Error registering user. Please try again.");
+            }
         });
-
-        // Function to update stages and remove users at stage 12
-        function updateStages(users) {
-            users.forEach(user => {
-                user.stage++;
-            });
-
-            // Remove users who reach stage 12
-            users = users.filter(user => user.stage <= 12);
-
-            return users;
-        }
-
-        // Function to display users in the dashboard
-        function displayUsers() {
-            const users = JSON.parse(localStorage.getItem("users")) || [];
-            const userList = document.getElementById("userList");
-
-            userList.innerHTML = ""; // Clear current list
-
-            users.forEach((user, index) => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `
-                    #${index + 1}: ${user.name} (${user.phone}) - Stage ${user.stage}
-                    [Country: ${user.country}, Gender: ${user.gender}, RN Code: ${user.rnCode}]
-                `;
-                userList.appendChild(listItem);
-            });
-        }
-
-        // Load users on page load
-        window.onload = function () {
-            displayUsers();
-        };
     </script>
 </body>
 </html>
